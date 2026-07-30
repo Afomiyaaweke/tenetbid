@@ -4,6 +4,7 @@ FROM oven/bun:1.2 AS deps
 WORKDIR /app
 
 # Install curl for health checks
+
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 # Copy package files first for better caching
 COPY package.json bun.lock ./
@@ -36,7 +37,7 @@ FROM oven/bun:1.2 AS runner
 WORKDIR /app
 
 # Install curl for health checks and runtime needs
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Set production environment
 ENV NODE_ENV=production
