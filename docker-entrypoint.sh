@@ -23,3 +23,5 @@ fi
 # Start the Next.js server
 echo "🌐 Starting Next.js server on port 3000..."
 exec bun server.js
+# docker-entrypoint.sh
+exec node server.js -p ${PORT:-3000}
