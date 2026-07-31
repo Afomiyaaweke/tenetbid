@@ -1,27 +1,24 @@
 #!/bin/bash
-set -e
+set -ex   # <-- print every command
 
-echo "🚀 Starting Afomiya Tender Ecosystem..."
+# Force DATABASE_URL if missing
+export DATABASE_URL="${DATABASE_URL:-file:./db/custom.db}"
+echo "DATABASE_URL is set to: $DATABASE_URL"
 
-# Check if database exists, if not initialize it
 if [ ! -f ./db/custom.db ]; then
   echo "📦 Database not found. Initializing..."
   mkdir -p ./db
 
-  # Push the schema to create the database
-  bunx prisma db push --skip-generate
+  # Use npx (Node) instead of bunx for better stability
+  npx prisma db push --skip-generate 2>&1   # show output
 
-  # Seed the database with sample data
-  echo "🌱 Seeding database with sample data..."
-  bun run prisma/seed.ts
+  echo "🌱 Seeding database..."
+  bun run prisma/seed.ts 2>&1
 
-  echo "✅ Database initialized successfully!"
+  echo "✅ Database initialized!"
 else
-  echo "✅ Database found. Skipping initialization."
+  echo "✅ Database found."
 fi
 
-# Start the Next.js server
-echo "🌐 Starting Next.js server on port 3000..."
-exec bun server.js
-# docker-entrypoint.sh
+echo "🌐 Starting server on port $PORT..."
 exec node server.js -p ${PORT:-3000}
