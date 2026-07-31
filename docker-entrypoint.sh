@@ -1,17 +1,19 @@
 #!/bin/sh
 set -e
 
+# Set DATABASE_URL if not already provided
 export DATABASE_URL="${DATABASE_URL:-file:./db/custom.db}"
 echo "DATABASE_URL is set to: $DATABASE_URL"
 
+# Create SQLite database if it doesn't exist
 if [ ! -f ./db/custom.db ]; then
   echo "📦 Database not found. Initializing..."
   mkdir -p ./db
-  # Use bunx instead of npx
-  bunx prisma db push --skip-generate
+  # Use bunx (not npx) and omit the invalid --skip-generate flag
+  bunx prisma db push
   echo "✅ Database initialized."
 fi
 
 echo "🚀 Starting Next.js server..."
 # Use exec to replace the shell with the server process
-exec node server.js   # or bun server.js
+exec node server.js
