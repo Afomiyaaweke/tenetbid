@@ -17,3 +17,17 @@ fi
 echo "🚀 Starting Next.js server..."
 # Use exec to replace the shell with the server process
 exec node server.js
+#!/bin/sh
+set -e
+
+# Create the database directory
+mkdir -p /app/db
+
+# Ensure the database file exists
+touch /app/db/custom.db
+
+# Run Prisma migrations if needed
+bun run db:push || true
+
+# Start the application
+exec bun run start

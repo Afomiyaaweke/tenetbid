@@ -1,85 +1,55 @@
-# ─── Stage 1: Dependencies ───
+# Your existing Dockerfile should look something like this:
+
+# Stage 1: Dependencies
 FROM oven/bun:1.2 AS deps
-
 WORKDIR /app
-
-# Install curl for health checks
-
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-# Copy package files first for better caching
 COPY package.json bun.lock ./
-COPY prisma ./prisma/
-
-# Install all dependencies
 RUN bun install
-
-# Generate Prisma client
+COPY prisma ./prisma/
 RUN bun run db:generate
 
-# ─── Stage 2: Build ───
+# Stage 2: Builder
 FROM oven/bun:1.2 AS builder
-
 WORKDIR /app
-
-# Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma ./prisma
-
-# Copy source code
 COPY . .
-
-# Build the Next.js standalone output
 RUN bun run build
 
-# ─── Stage 3: Production ───
+# Stage 3: Runner (Production)
 FROM oven/bun:1.2 AS runner
-
 WORKDIR /app
 
-# Install curl for health checks and runtime needs
+# Install OpenSSL
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
-# Set production environment
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+# ✅ ADD THIS LINE - Create database directory
+# Alternative: Create directory and set ownership
+RUN mkdir -p /app/db && chown -R nextjs:nodejs /app/db
 
-# Don't run as root
+# Create nextjs user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy standalone build output
+# ... rest of your Dockerfile
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-
-# Copy Prisma schema, engine, and CLI for runtime DB operations
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
-# Copy the seed file for DB initialization
-COPY --from=builder /app/prisma/seed.ts ./prisma/seed.ts
+# Set proper ownership
+RUN chown -R nextjs:nodejs /app
 
-# Create db directory and set ownership
-RUN mkdir -p ./db && chown -R nextjs:nodejs ./db
-
-# Copy entrypoint script
-COPY --chmod=755 docker-entrypoint.sh ./docker-entrypoint.sh
-
-# Switch to non-root user
+# Switch to nextjs user
 USER nextjs
 
-# Expose port
-EXPOSE 3000
-
-# Set hostname
-ENV HOSTNAME="0.0.0.0"
+# Set environment variables
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+ENV DATABASE_URL=file:/app/db/custom.db
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD curl -f http://localhost:3000/api || exit 1
-
-# Start with entrypoint
-ENTRYPOINT ["./docker-entrypoint.sh"]
+EXPOSE 3000
+CMD ["bun", "run", "start"]

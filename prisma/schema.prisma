@@ -1,11 +1,12 @@
-generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-1.1.x"]
-}
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
-}
+// Before (Prisma 6):
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
+
+// After (Prisma 7):
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient({
+  datasourceUrl: process.env.DATABASE_URL,
+})
 
 // ==========================================
 // USER & AUTHENTICATION
