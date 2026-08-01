@@ -31,3 +31,20 @@ bun run db:push || true
 
 # Start the application
 exec bun run start
+#!/bin/bash
+set -e
+
+# Set DATABASE_URL if not already set
+export DATABASE_URL="${DATABASE_URL:-file:/app/db/dev.db}"
+
+# Ensure db directory exists and has correct permissions
+mkdir -p /app/db
+
+# Generate Prisma client
+bunx prisma generate
+
+# Run migrations
+bunx prisma migrate deploy
+
+# Start the application
+exec bun run start
