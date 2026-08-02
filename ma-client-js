@@ -1,0 +1,340 @@
+[33mcommit 33b60ddf502973aee75f009fe59f523ec6aa511b[m
+Author: Afomiya Aweke <ananiyabersa060@gmail.com>
+Date:   Sat Aug 1 13:02:34 2026 +0100
+
+    schema fix
+
+[1mdiff --git a/prisma/schema.prisma b/prisma/schema.prisma[m
+[1mindex 5bac69b..480edfe 100755[m
+[1m--- a/prisma/schema.prisma[m
+[1m+++ b/prisma/schema.prisma[m
+[36m@@ -1,11 +1,12 @@[m
+[31m-generator client {[m
+[31m-  provider      = "prisma-client-js"[m
+[31m-  binaryTargets = ["native", "debian-openssl-1.1.x"][m
+[31m-}[m
+[31m-datasource db {[m
+[31m-  provider = "sqlite"[m
+[31m-  url      = env("DATABASE_URL")[m
+[31m-}[m
+[32m+[m[32m// Before (Prisma 6):[m
+[32m+[m[32mimport { PrismaClient } from '@prisma/client'[m
+[32m+[m[32mconst prisma = new PrismaClient()[m
+[32m+[m
+[32m+[m[32m// After (Prisma 7):[m
+[32m+[m[32mimport { PrismaClient } from '@prisma/client'[m
+[32m+[m[32mconst prisma = new PrismaClient({[m
+[32m+[m[32m  datasourceUrl: process.env.DATABASE_URL,[m
+[32m+[m[32m})[m
+ [m
+ // ==========================================[m
+ // USER & AUTHENTICATION[m
+
+[33mcommit 2cffce9f76afb152f0622ca82d18406ecfa4ae9e[m
+Author: Afomiya Aweke <ananiyabersa060@gmail.com>
+Date:   Thu Jul 30 18:36:14 2026 +0100
+
+    fix: add binaryTargets for OpenSSL 1.1.x and install openssl in runner
+
+[1mdiff --git a/prisma/schema.prisma b/prisma/schema.prisma[m
+[1mindex 1925069..5bac69b 100755[m
+[1m--- a/prisma/schema.prisma[m
+[1m+++ b/prisma/schema.prisma[m
+[36m@@ -1,7 +1,7 @@[m
+ generator client {[m
+[31m-  provider = "prisma-client-js"[m
+[32m+[m[32m  provider      = "prisma-client-js"[m
+[32m+[m[32m  binaryTargets = ["native", "debian-openssl-1.1.x"][m
+ }[m
+[31m-[m
+ datasource db {[m
+   provider = "sqlite"[m
+   url      = env("DATABASE_URL")[m
+
+[33mcommit 5c5147118ab99754b0dc58bd4fc8c481d7639796[m
+Author: Z User <z@container>
+Date:   Tue May 12 02:33:38 2026 +0000
+
+    5332bea0-4215-41aa-9ba9-9e08582146f6
+
+[1mdiff --git a/prisma/schema.prisma b/prisma/schema.prisma[m
+[1mold mode 100644[m
+[1mnew mode 100755[m
+
+[33mcommit c60ebf9a4cc83f7ef8aee85d718c1440dfdb4da5[m
+Author: Z User <z@container>
+Date:   Mon May 11 21:36:26 2026 +0000
+
+    8b8aa846-d5e9-4078-b0ff-444ba2e71b03
+
+[1mdiff --git a/prisma/schema.prisma b/prisma/schema.prisma[m
+[1mnew file mode 100644[m
+[1mindex 0000000..1925069[m
+[1m--- /dev/null[m
+[1m+++ b/prisma/schema.prisma[m
+[36m@@ -0,0 +1,265 @@[m
+[32m+[m[32mgenerator client {[m
+[32m+[m[32m  provider = "prisma-client-js"[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mdatasource db {[m
+[32m+[m[32m  provider = "sqlite"[m
+[32m+[m[32m  url      = env("DATABASE_URL")[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// USER & AUTHENTICATION[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel User {[m
+[32m+[m[32m  id           String    @id @default(cuid())[m
+[32m+[m[32m  email        String    @unique[m
+[32m+[m[32m  passwordHash String[m
+[32m+[m[32m  role         String    @default("contractor") // admin, contractor, tender_owner[m
+[32m+[m[32m  status       String    @default("active") // active, suspended, banned[m
+[32m+[m[32m  emailVerified Boolean  @default(false)[m
+[32m+[m[32m  createdAt    DateTime  @default(now())[m
+[32m+[m[32m  updatedAt    DateTime  @updatedAt[m
+[32m+[m
+[32m+[m[32m  profile     Profile?[m
+[32m+[m[32m  documents   Document[][m
+[32m+[m[32m  bids        Bid[][m
+[32m+[m[32m  messages    Message[][m
+[32m+[m[32m  registrations Registration[][m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// PROFILE (KYC Lite)[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Profile {[m
+[32m+[m[32m  id           String  @id @default(cuid())[m
+[32m+[m[32m  userId       String  @unique[m
+[32m+[m[32m  type         String  @default("individual") // individual, company[m
+[32m+[m[32m  fullName     String[m
+[32m+[m[32m  companyName  String?[m
+[32m+[m[32m  phone        String[m
+[32m+[m[32m  location     String[m
+[32m+[m[32m  address      String?[m
+[32m+[m[32m  tinNumber    String?[m
+[32m+[m[32m  licenseNumber String?[m
+[32m+[m[32m  skillTags    String  @default("") // comma-separated[m
+[32m+[m[32m  bio          String?[m
+[32m+[m[32m  logoUrl      String?[m
+[32m+[m[32m  profilePhoto String?[m
+[32m+[m[32m  verified     Boolean @default(false)[m
+[32m+[m[32m  createdAt    DateTime @default(now())[m
+[32m+[m[32m  updatedAt    DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  user User @relation(fields: [userId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// DOCUMENT VAULT[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Document {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  userId      String[m
+[32m+[m[32m  docType     String   // business_license, tax_clearance, portfolio, certificate, other[m
+[32m+[m[32m  fileUrl     String[m
+[32m+[m[32m  fileName    String[m
+[32m+[m[32m  status      String   @default("pending") // pending, approved, rejected[m
+[32m+[m[32m  reviewNotes String?[m
+[32m+[m[32m  reviewedAt  DateTime?[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m
+[32m+[m[32m  user User @relation(fields: [userId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// TENDER[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Tender {[m
+[32m+[m[32m  id            String   @id @default(cuid())[m
+[32m+[m[32m  title         String[m
+[32m+[m[32m  scope         String   // rich text description[m
+[32m+[m[32m  budgetMin     Float[m
+[32m+[m[32m  budgetMax     Float[m
+[32m+[m[32m  deadline      DateTime[m
+[32m+[m[32m  location      String[m
+[32m+[m[32m  categoryTags  String   // comma-separated: Construction, IT, Supply, Consulting, etc.[m
+[32m+[m[32m  requiredDocs  String   @default("") // comma-separated doc types[m
+[32m+[m[32m  status        String   @default("open") // draft, open, closed, awarded, cancelled[m
+[32m+[m[32m  createdBy     String   // admin user id[m
+[32m+[m[32m  createdAt     DateTime @default(now())[m
+[32m+[m[32m  updatedAt     DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  bids     Bid[][m
+[32m+[m[32m  project  Project?[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// BID[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Bid {[m
+[32m+[m[32m  id                String   @id @default(cuid())[m
+[32m+[m[32m  tenderId          String[m
+[32m+[m[32m  userId            String[m
+[32m+[m[32m  technicalProposal String   // rich text[m
+[32m+[m[32m  financialProposal Float    // amount in ETB[m
+[32m+[m[32m  timeline          String   // e.g. "30 days"[m
+[32m+[m[32m  attachments       String   @default("") // JSON string of file URLs[m
+[32m+[m[32m  status            String   @default("pending_review") // pending_review, shortlisted, awarded, rejected[m
+[32m+[m[32m  rejectionNote     String?[m
+[32m+[m[32m  createdAt         DateTime @default(now())[m
+[32m+[m[32m  updatedAt         DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  tender  Tender  @relation(fields: [tenderId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m  project Project?[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// PROJECT WORKSPACE[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Project {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  tenderId    String   @unique[m
+[32m+[m[32m  bidId       String   @unique[m
+[32m+[m[32m  status      String   @default("active") // active, completed, on_hold, cancelled[m
+[32m+[m[32m  contractValue Float  // from bid financial proposal[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m[32m  updatedAt   DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  tender    Tender    @relation(fields: [tenderId], references: [id])[m
+[32m+[m[32m  bid       Bid       @relation(fields: [bidId], references: [id])[m
+[32m+[m[32m  tasks     Task[][m
+[32m+[m[32m  payments  Payment[][m
+[32m+[m[32m  chat      Chat?[m
+[32m+[m[32m  milestones Milestone[][m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// TASK (Kanban)[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Task {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  projectId   String[m
+[32m+[m[32m  title       String[m
+[32m+[m[32m  description String?[m
+[32m+[m[32m  status      String   @default("todo") // todo, in_progress, done[m
+[32m+[m[32m  dueDate     DateTime?[m
+[32m+[m[32m  order       Int      @default(0)[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m[32m  updatedAt   DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// MILESTONE[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Milestone {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  projectId   String[m
+[32m+[m[32m  title       String[m
+[32m+[m[32m  dueDate     DateTime[m
+[32m+[m[32m  completed   Boolean  @default(false)[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m[32m  updatedAt   DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// FINANCIAL TRACKING[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Payment {[m
+[32m+[m[32m  id              String   @id @default(cuid())[m
+[32m+[m[32m  projectId       String[m
+[32m+[m[32m  amount          Float[m
+[32m+[m[32m  paymentMethod   String   // bank_transfer, cbe_birr, cash, check[m
+[32m+[m[32m  referenceNumber String?[m
+[32m+[m[32m  notes           String?[m
+[32m+[m[32m  paymentDate     DateTime[m
+[32m+[m[32m  createdAt       DateTime @default(now())[m
+[32m+[m
+[32m+[m[32m  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// COMMUNICATION HUB[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Chat {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  projectId   String?  @unique[m
+[32m+[m[32m  tenderId    String?[m
+[32m+[m[32m  contextType String   // tender, project[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m
+[32m+[m[32m  messages Message[][m
+[32m+[m[32m  project  Project? @relation(fields: [projectId], references: [id])[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mmodel Message {[m
+[32m+[m[32m  id        String   @id @default(cuid())[m
+[32m+[m[32m  chatId    String[m
+[32m+[m[32m  userId    String[m
+[32m+[m[32m  content   String[m
+[32m+[m[32m  flagged   Boolean  @default(false)[m
+[32m+[m[32m  read      Boolean  @default(false)[m
+[32m+[m[32m  createdAt DateTime @default(now())[m
+[32m+[m
+[32m+[m[32m  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m  user User @relation(fields: [userId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// CAPACITY BUILDING (Workshops)[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Event {[m
+[32m+[m[32m  id          String   @id @default(cuid())[m
+[32m+[m[32m  title       String[m
+[32m+[m[32m  description String[m
+[32m+[m[32m  eventDate   DateTime[m
+[32m+[m[32m  location    String[m
+[32m+[m[32m  capacity    Int[m
+[32m+[m[32m  status      String   @default("upcoming") // upcoming, ongoing, completed, cancelled[m
+[32m+[m[32m  category    String   @default("workshop") // workshop, training, seminar[m
+[32m+[m[32m  createdAt   DateTime @default(now())[m
+[32m+[m[32m  updatedAt   DateTime @updatedAt[m
+[32m+[m
+[32m+[m[32m  registrations Registration[][m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32mmodel Registration {[m
+[32m+[m[32m  id        String   @id @default(cuid())[m
+[32m+[m[32m  eventId   String[m
+[32m+[m[32m  userId    String[m
+[32m+[m[32m  attended  Boolean  @default(false)[m
+[32m+[m[32m  createdAt DateTime @default(now())[m
+[32m+[m
+[32m+[m[32m  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)[m
+[32m+[m[32m  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)[m
+[32m+[m
+[32m+[m[32m  @@unique([eventId, userId])[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m// ==========================================[m
+[32m+[m[32m// NOTIFICATION[m
+[32m+[m[32m// ==========================================[m
+[32m+[m
+[32m+[m[32mmodel Notification {[m
+[32m+[m[32m  id        String   @id @default(cuid())[m
+[32m+[m[32m  userId    String[m
+[32m+[m[32m  title     String[m
+[32m+[m[32m  message   String[m
+[32m+[m[32m  type      String   @default("info") // info, success, warning, alert[m
+[32m+[m[32m  read      Boolean  @default(false)[m
+[32m+[m[32m  link      String?[m
+[32m+[m[32m  createdAt DateTime @default(now())[m
+[32m+[m[32m}[m

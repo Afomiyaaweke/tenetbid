@@ -1,12 +1,11 @@
-// Before (Prisma 6):
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient()
+generator client {
+  provider = "prisma-client-js"
+}
 
-// After (Prisma 7):
-import { PrismaClient } from '@prisma/client'
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-})
+datasource db {
+  provider = "postgresql" // change to "mysql", "sqlite", etc. if different
+  url      = env("DATABASE_URL")
+}
 
 // ==========================================
 // USER & AUTHENTICATION
